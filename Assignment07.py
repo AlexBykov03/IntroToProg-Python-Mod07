@@ -1,11 +1,11 @@
-# ------------------------------------------------------------------------------------------ #
+# ---------------------------------------------------------------------------- #
 # Title: Assignment07
 # Desc: This assignment demonstrates using data classes
 # with structured error handling
 # Change Log: (Who, When, What)
 #   RRoot,1/1/2030,Created Script
 #   <Your Name Here>,<Date>,<Activity>
-# ------------------------------------------------------------------------------------------ #
+# ---------------------------------------------------------------------------- #
 import json
 
 # Define the Data Constants
@@ -22,22 +22,23 @@ FILE_NAME: str = "Enrollments.json"
 
 # Define the Data Variables
 students: list = []  # a table of student data
-menu_choice: str  # Hold the choice made by the user.
+menu_choice: str = "" # Hold the choice made by the user.
 
-
-# TODO Create a Person Class
-# TODO Add first_name and last_name properties to the constructor
-# TODO Create a getter and setter for the first_name property
-# TODO Create a getter and setter for the last_name property
-# TODO Override the __str__() method to return Person data
 
 class Person:
+    """
+    Person class carrying first name and last name attributes.
+    Parent class of Student
 
-    def __init__(self, first_name: str = "", last_name: str = ""): # Default parameters
-        self.first_name = first_name # set the attribute using the property to provide validation
+    Alex Novik 8/27/2025 Created Class
+    """
+
+    # Initialization
+    def __init__(self, first_name: str = "", last_name: str = ""):
+        self.first_name = first_name # set the attribute using the property
         self.last_name = last_name
 
-    # TODO Add more detail here
+    # String function
     def __str__(self):
         return f"First and last names are: {self.first_name},{self.last_name}"
 
@@ -58,28 +59,31 @@ class Person:
 
     @last_name.setter # (setter)
     def last_name(self, value):
-        if str(value).isalpha() or value = "":
+        if str(value).isalpha() or value == "":
             self.__last_name_str = value
         else:
             raise ValueError("Use letters only")
 
-    # TODO (ME) Try Setting specific values to test operation of this class
-
-# TODO Create a Student class the inherits from the Person class
-# TODO call to the Person constructor and pass it the first_name and last_name data
-# TODO add a assignment to the course_name property using the course_name parameter
-# TODO add the getter for course_name
-# TODO add the setter for course_name
-# TODO Override the __str__() method to return the Student data
 
 class Student(Person):
-    
-    def __init__(self, first_nam: str = '', last_name: str = '', course_name: str = ''):
+    """
+    Student class inheriting first name and last name attributes.
+    Adds course name attribute
+    Child of Person class
+
+    Alex Novik 8/27/2025 Created Class
+    """
+
+    # Initialization
+    def __init__(self, first_name: str = "", last_name: str = "",
+                 course_name: str = ""):
         super().__init__(first_name=first_name, last_name=last_name)
         self.course_name = course_name
 
+    # String function
     def __str__(self):
-        return f"{self.first_name}{self.last_name},{self.course_name}"
+        return (f"The name is {self.first_name} "
+                f"{self.last_name}, and course is {self.course_name}")
 
     @property # (getter)
     def course_name(self): # Name used to work with the data
@@ -89,9 +93,7 @@ class Student(Person):
     def course_name(self, value):
         self.__course_name_str = value
 
-
-
-# Processing --------------------------------------- #
+# Processing ---------------------------------------------------------------- #
 class FileProcessor:
     """
     A collection of processing layer functions that work with Json files
@@ -101,7 +103,8 @@ class FileProcessor:
     """
     @staticmethod
     def read_data_from_file(file_name: str):
-        """ This function reads data from a json file and loads it into a list of dictionary rows
+        """ This function reads data from a json file and loads it into
+        a list of dictionary rows
         then returns the list filled with student data.
 
         ChangeLog: (Who, When, What)
@@ -116,30 +119,30 @@ class FileProcessor:
             # Get a list of dictionary rows from the data file
             file = open(file_name, "r")
             json_students = json.load(file)
-
             # Convert the list of dictionary rows into a list of Student objects
             student_objects = []
-            # TODO replace this line of code to convert dictionary data to Student data
-            # for row in json_students:
-            #     student_obj = Student(first_name=row["FirstName"],last_name=row["LastName"],course_name=row["CourseName"])
-            #     student_objects.append(student_obj)
-            # TODO (ME) Refer to notes to the code used to convert dictionary to objects 
-            student_objects = json_students
-
+            for row in json_students:
+                student_obj = Student(first_name=row["FirstName"],
+                                      last_name=row["LastName"],
+                                      course_name=row["CourseName"])
+                student_objects.append(student_obj)
             file.close()
 
         except Exception as e:
-            IO.output_error_messages(message="Error: There was a problem with reading the file.", error=e)
+            err_message = "Error: There was a problem with reading the file."
+            IO.output_error_messages(message=err_message, error=e)
 
         finally:
-            if file.closed == False:
+            if not file.closed:
                 file.close()
 
         return student_objects
 
+
     @staticmethod
     def write_data_to_file(file_name: str, student_data: list):
-        """ This function writes data to a json file with data from a list of dictionary rows
+        """ This function writes data to a json file with data from a
+        list of dictionary rows
 
         ChangeLog: (Who, When, What)
         RRoot,1.1.2030,Created function
@@ -149,27 +152,38 @@ class FileProcessor:
 
         :return: None
         """
-
+        json_students = []
         try:
-            # TODO Add code to convert Student objects into dictionaries (Done)
-
+            for row in student_data:
+                student = {"FirstName":row.first_name,
+                           "LastName":row.last_name,
+                           "CourseName":row.course_name}
+                json_students.append(student)
+                #print(student)
             file = open(file_name, "w")
-            json.dump(student_data, file)
+            json.dump(json_students, file) # Changed to json_students
             file.close()
+
             IO.output_student_and_course_names(student_data=student_data)
         except Exception as e:
             message = "Error: There was a problem with writing to the file.\n"
-            message += "Please check that the file is not open by another program."
+            message += "Please check that file is not open by another program."
             IO.output_error_messages(message=message,error=e)
         finally:
-            if file.closed == False:
+            if not file.closed:
                 file.close()
 
+# """TEST"""
+# test_data = FileProcessor.read_data_from_file(FILE_NAME)
+# for item in test_data:
+#     print(item.first_name, item.last_name, item.course_name)
 
-# Presentation --------------------------------------- #
+
+# Presentation ----------------------------------------------------------------#
 class IO:
     """
-    A collection of presentation layer functions that manage user input and output
+    A collection of presentation layer functions that manage user
+    input and output
 
     ChangeLog: (Who, When, What)
     RRoot,1.1.2030,Created Class
@@ -224,7 +238,7 @@ class IO:
             if choice not in ("1","2","3","4"):  # Note these are strings
                 raise Exception("Please, choose only 1, 2, 3, or 4")
         except Exception as e:
-            IO.output_error_messages(e.__str__())  # Not passing e to avoid the technical message
+            IO.output_error_messages(e.__str__())  # avoid the technical message
 
         return choice
 
@@ -241,26 +255,22 @@ class IO:
         """
 
         print("-" * 50)
-        for student in student_data: # Change to student_objects? but then I will have to change the whole function...
-
-            # TODO Add code to access Student object data instead of dictionary data
-            # student_dict = {"FirstName": student.first_name,"LastName": student.last_name,"CourseName": student.course_name}
-            # ^ Probably not, I think this fucntion is about displaying only. Therefore, I need to only change the line below...
-            # This function takes in a list, right? So when we put in a list of objects, then run through them in the for loop and then...
-            # print(f"Student {student.first_name} {student.last_name} is enrolled in {student.course_name}")
-            print(f'Student {student["FirstName"]} '
-                  f'{student["LastName"]} is enrolled in {student["CourseName"]}')
+        for student in student_data:
+            # Print student object attributes
+            print(f'Student {student.first_name} '
+                  f'{student.last_name} is enrolled in {student.course_name}')
 
         print("-" * 50)
 
     @staticmethod
     def input_student_data(student_data: list):
-        """ This function gets the student's first name and last name, with a course name from the user
+        """ This function gets the student's first name and last name,
+        with a course name from the user
 
         ChangeLog: (Who, When, What)
         RRoot,1.1.2030,Created function
 
-        :param student_data: list of dictionary rows to be filled with input data
+        :param student_data: list of dictionary rows filled with input data
 
         :return: list
         """
@@ -274,19 +284,19 @@ class IO:
                 raise ValueError("The last name should not contain numbers.")
             course_name = input("Please enter the name of the course: ")
 
-            # TODO Replace this code to use a Student objects instead of a dictionary objects
-            # student = Student(first_name=student_first_name,last_name=student_last_name,course_name=course_name)
-            student = {"FirstName": student_first_name,
-                       "LastName": student_last_name,
-                       "CourseName": course_name}
-
+            student = Student(first_name=student_first_name,
+                              last_name=student_last_name,
+                              course_name=course_name)
             student_data.append(student)
             print()
-            print(f"You have registered {student_first_name} {student_last_name} for {course_name}.")
+            print(f"You have registered {student_first_name} "
+                  f"{student_last_name} for {course_name}.")
         except ValueError as e:
-            IO.output_error_messages(message="One of the values was the correct type of data!", error=e)
+            err1 = "One of the values was the correct type of data!"
+            IO.output_error_messages(message=err1, error=e)
         except Exception as e:
-            IO.output_error_messages(message="Error: There was a problem with your entered data.", error=e)
+            err2 = "Error: There was a problem with your entered data."
+            IO.output_error_messages(message=err2, error=e)
         return student_data
 
 
@@ -316,7 +326,8 @@ while (True):
 
     # Save the data to a file
     elif menu_choice == "3":
-        FileProcessor.write_data_to_file(file_name=FILE_NAME, student_data=students)
+        FileProcessor.write_data_to_file(file_name=FILE_NAME,
+                                         student_data=students)
         continue
 
     # Stop the loop
